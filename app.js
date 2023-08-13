@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from "express";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
-import encrypt from "mongoose-encryption";
+import md5 from "md5";
 
 const app = express();
 
@@ -20,10 +20,10 @@ async function startServer() {
     password: String,
   });
   //encrypt fileds decides which fields to encrypt
-  userSchema.plugin(encrypt, {
-    secret: process.env.SECRET,
-    encryptedFields: ["password"],
-  });
+  //   userSchema.plugin(encrypt, {
+  //     secret: process.env.SECRET,
+  //     encryptedFields: ["password"],
+  //   });
 
   const User = mongoose.model("user", userSchema);
 
@@ -43,7 +43,7 @@ async function startServer() {
     try {
       const newuser = new User({
         email: req.body.username,
-        password: req.body.password,
+        password: md5(req.body.password),
       });
       console.log(req.body.username);
 
@@ -57,7 +57,7 @@ async function startServer() {
   });
   app.post("/login", async (req, res) => {
     let username = req.body.username;
-    let password = req.body.password;
+    let password = md5(req.body.password);
 
     const curr_user = await User.findOne({
       email: username,
